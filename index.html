@@ -70,6 +70,37 @@
             border: 1px solid #ddd;
             border-radius: 4px;
         }
+        .color-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .color-button {
+            width: 60px;
+            height: 60px;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        #fullScreenColor {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+            justify-content: center;
+            align-items: flex-end;
+            padding-bottom: 20px;
+        }
+        #returnButton {
+            padding: 10px 20px;
+            background-color: white;
+            color: black;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -84,6 +115,15 @@
             <input type="password" id="newPassword" placeholder="Enter new password">
             <button onclick="changePassword()">Change Password</button>
         </div>
+        <div class="color-buttons">
+            <button class="color-button" style="background-color: red;" onclick="showColor('red')"></button>
+            <button class="color-button" style="background-color: yellow;" onclick="showColor('yellow')"></button>
+            <button class="color-button" style="background-color: green;" onclick="showColor('green')"></button>
+            <button class="color-button" style="background-color: blue;" onclick="showColor('blue')"></button>
+        </div>
+    </div>
+    <div id="fullScreenColor">
+        <button id="returnButton" onclick="hideColor()">Return</button>
     </div>
 
     <script>
@@ -127,6 +167,19 @@
             } else {
                 alert('Please enter a new password.');
             }
+        }
+
+        function showColor(color) {
+            const fullScreenColor = document.getElementById('fullScreenColor');
+            fullScreenColor.style.backgroundColor = color;
+            fullScreenColor.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function hideColor() {
+            const fullScreenColor = document.getElementById('fullScreenColor');
+            fullScreenColor.style.display = 'none';
+            document.body.style.overflow = 'auto';
         }
 
         // Listen for safe status changes
