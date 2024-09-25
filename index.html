@@ -171,19 +171,19 @@ function updateSafeStatus(status) {
 }
 
 function confirmOpenSafe() {
-    database.ref('adddelete/fromFb').set('1')
+    database.ref('fromFb').set('1')
         .then(() => console.log('Confirm open command sent'))
         .catch(error => console.error('Error sending confirm open command:', error));
 }
 
 function denyOpenSafe() {
-    database.ref('adddelete/fromFb').set('0')
+    database.ref('fromFb').set('0')
         .then(() => console.log('Deny open command sent'))
         .catch(error => console.error('Error sending deny open command:', error));
 }
 
 function lockSafe() {
-    database.ref('adddelete/fromFb').set('2')
+    database.ref('fromFb').set('2')
         .then(() => console.log('Lock command sent'))
         .catch(error => console.error('Error sending lock command:', error));
 }
@@ -191,7 +191,7 @@ function lockSafe() {
 function changePassword() {
     const newPassword = document.getElementById('newPassword').value;
     if (newPassword) {
-        database.ref('adddelete/fromFb').set(`password:${newPassword}`)
+        database.ref('fromFb').set(`password:${newPassword}`)
             .then(() => {
                 alert('Password change request sent.');
                 document.getElementById('newPassword').value = '';
