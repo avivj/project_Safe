@@ -223,7 +223,7 @@ function checkOpenRequest() {
 }
 
 // Listen for safe status changes
-database.ref('adddelete/tofb').on('value', (snapshot) => {
+database.ref('tofb').on('value', (snapshot) => {
     const status = snapshot.val();
     console.log('tofb value:', status);
     if (status === 1) {
