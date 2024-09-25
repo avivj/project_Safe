@@ -102,10 +102,6 @@
             border-radius: 4px;
             cursor: pointer;
         }
-        #testButton {
-            margin-top: 20px;
-            width: 100%;
-        }
     </style>
 </head>
 <body>
@@ -133,123 +129,138 @@
     </div>
 
     <script>
+    // Initialize Firebase with your config
+    const firebaseConfig = {
+        apiKey: "AIzaSyCIVveFeJsFBTx91_l-cdeeld6bjX88veY",
+        authDomain: "wifi-esp32-a7b37.firebaseapp.com",
+        databaseURL: "https://wifi-esp32-a7b37-default-rtdb.firebaseio.com",
+        projectId: "wifi-esp32-a7b37",
+        storageBucket: "wifi-esp32-a7b37.appspot.com",
+        messagingSenderId: "168799501424",
+        appId: "1:168799501424:web:a9ba64a76245fce2e408b5"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
 
+    let currentSafeStatus = 'locked';
+    let colorSequenceValid = false;
+    let tofbValue = 0;
 
-// Initialize Firebase with your config
-// Initialize Firebase with your config
-const firebaseConfig = {
-    apiKey: "AIzaSyCIVveFeJsFBTx91_l-cdeeld6bjX88veY",
-    authDomain: "wifi-esp32-a7b37.firebaseapp.com",
-    databaseURL: "https://wifi-esp32-a7b37-default-rtdb.firebaseio.com",
-    projectId: "wifi-esp32-a7b37",
-    storageBucket: "wifi-esp32-a7b37.appspot.com",
-    messagingSenderId: "168799501424",
-    appId: "1:168799501424:web:a9ba64a76245fce2e408b5"
-};
-firebase.initializeApp(firebaseConfig);
-const database = firebase.database();
+    function updateSafeStatus(status) {
+        const statusElement = document.getElementById('safeStatus');
+        if (status === 'locked') {
+            statusElement.textContent = 'Safe is LOCKED';
+            statusElement.className = 'status safe-closed';
+        } else if (status === 'open') {
+            statusElement.textContent = 'Safe is OPEN';
+            statusElement.className = 'status safe-open';
+        } else if (status === 'request_open') {
+            statusElement.textContent = 'Request to OPEN';
+            statusElement.className = 'status safe-request';
+        }
+        currentSafeStatus = status;
 
-let currentSafeStatus = 'locked';
-let colorSequenceValid = false;
-let tofbValue = 0;
-
-function updateSafeStatus(status) {
-    const statusElement = document.getElementById('safeStatus');
-    if (status === 'locked') {
-        statusElement.textContent = 'Safe is LOCKED';
-        statusElement.className = 'status safe-closed';
-    } else if (status === 'open') {
-        statusElement.textContent = 'Safe is OPEN';
-        statusElement.className = 'status safe-open';
-    } else if (status === 'request_open') {
-        statusElement.textContent = 'Request to OPEN';
-        statusElement.className = 'status safe-request';
+        document.getElementById('confirmOpenBtn').disabled = status !== 'request_open';
+        document.getElementById('denyOpenBtn').disabled = status !== 'request_open';
+        
+        document.getElementById('changePasswordForm').style.display = status === 'open' ? 'block' : 'none';
     }
-    currentSafeStatus = status;
 
-    document.getElementById('confirmOpenBtn').disabled = status !== 'request_open';
-    document.getElementById('denyOpenBtn').disabled = status !== 'request_open';
-    
-    document.getElementById('changePasswordForm').style.display = status === 'open' ? 'block' : 'none';
-}
-
-function checkOpenRequest() {
-    if (colorSequenceValid && tofbValue === 1) {
-        updateSafeStatus('request_open');
-        console.log('Request to open the safe received!');
-    } else {
-        updateSafeStatus('locked');
+    function checkOpenRequest() {
+        if (colorSequenceValid && tofbValue === 1) {
+            updateSafeStatus('request_open');
+            console.log('Request to open the safe received!');
+        } else {
+            updateSafeStatus('locked');
+        }
     }
-}
 
-function confirmOpenSafe() {
-    database.ref('fromFb').set(1)
-        .then(() => console.log('Confirm open command sent'))
-        .catch(error => console.error('Error sending confirm open command:', error));
-}
-
-function denyOpenSafe() {
-    database.ref('fromFb').set(0)
-        .then(() => console.log('Deny open command sent'))
-        .catch(error => console.error('Error sending deny open command:', error));
-}
-
-function lockSafe() {
-    database.ref('fromFb').set(2)
-        .then(() => console.log('Lock command sent'))
-        .catch(error => console.error('Error sending lock command:', error));
-}
-
-function changePassword() {
-    const newPassword = document.getElementById('newPassword').value;
-    if (newPassword) {
-        database.ref('fromFb').set(`password:${newPassword}`)
-            .then(() => {
-                alert('Password change request sent.');
-                document.getElementById('newPassword').value = '';
-            })
-            .catch(error => console.error('Error sending password change:', error));
-    } else {
-        alert('Please enter a new password.');
+    function confirmOpenSafe() {
+        database.ref('fromFb').set(1)
+            .then(() => console.log('Confirm open command sent'))
+            .catch(error => console.error('Error sending confirm open command:', error));
     }
-}
 
-function showColor(color) {
-    const fullScreenColor = document.getElementById('fullScreenColor');
-    fullScreenColor.style.backgroundColor = color;
-    fullScreenColor.style.display = 'flex';
-    document.body.style.overflow = 'hidden';
-}
+    function denyOpenSafe() {
+        database.ref('fromFb').set(0)
+            .then(() => console.log('Deny open command sent'))
+            .catch(error => console.error('Error sending deny open command:', error));
+    }
 
-function hideColor() {
-    const fullScreenColor = document.getElementById('fullScreenColor');
-    fullScreenColor.style.display = 'none';
-    document.body.style.overflow = 'auto';
-}
+    function lockSafe() {
+        database.ref('fromFb').set(2)
+            .then(() => console.log('Lock command sent'))
+            .catch(error => console.error('Error sending lock command:', error));
+    }
 
-// Listen for safe status changes
-database.ref('tofb').on('value', (snapshot) => {
-    tofbValue = snapshot.val();
-    console.log('tofb value:', tofbValue);
-    checkOpenRequest();
-}, (error) => {
-    console.error('Error listening to safe status:', error);
-});
+    function changePassword() {
+        const newPassword = document.getElementById('newPassword').value;
+        if (newPassword) {
+            database.ref('fromFb').set(`password:${newPassword}`)
+                .then(() => {
+                    alert('Password change request sent.');
+                    document.getElementById('newPassword').value = '';
+                })
+                .catch(error => console.error('Error sending password change:', error));
+        } else {
+            alert('Please enter a new password.');
+        }
+    }
 
-// Listen for color sequence changes
-database.ref('color_sequence').on('value', (snapshot) => {
-    const value = snapshot.val();
-    console.log('color_sequence value:', value);
-    colorSequenceValid = value === 1;
-    checkOpenRequest();
-}, (error) => {
-    console.error('Error listening to color sequence:', error);
-});
+    function showColor(color) {
+        const fullScreenColor = document.getElementById('fullScreenColor');
+        fullScreenColor.style.backgroundColor = color;
+        fullScreenColor.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
 
-// Add event listener for double-click to lock the safe
-document.addEventListener('dblclick', lockSafe);
+    function hideColor() {
+        const fullScreenColor = document.getElementById('fullScreenColor');
+        fullScreenColor.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
 
-console.log('JavaScript loaded and Firebase listeners set up.');
+    function resetValues() {
+        database.ref('color_sequence').set(0)
+            .then(() => console.log('color_sequence reset to 0'))
+            .catch(error => console.error('Error resetting color_sequence:', error));
+
+        database.ref('fromFb').set(0)
+            .then(() => console.log('fromFb reset to 0'))
+            .catch(error => console.error('Error resetting fromFb:', error));
+
+        colorSequenceValid = false;
+    }
+
+    // Listen for safe status changes
+    database.ref('tofb').on('value', (snapshot) => {
+        tofbValue = snapshot.val();
+        console.log('tofb value:', tofbValue);
+        
+        if (tofbValue === 0) {
+            console.log('Reset signal received. Resetting values...');
+            resetValues();
+        } else {
+            checkOpenRequest();
+        }
+    }, (error) => {
+        console.error('Error listening to safe status:', error);
+    });
+
+    // Listen for color sequence changes
+    database.ref('color_sequence').on('value', (snapshot) => {
+        const value = snapshot.val();
+        console.log('color_sequence value:', value);
+        colorSequenceValid = value === 1;
+        checkOpenRequest();
+    }, (error) => {
+        console.error('Error listening to color sequence:', error);
+    });
+
+    // Add event listener for double-click to lock the safe
+    document.addEventListener('dblclick', lockSafe);
+
+    console.log('JavaScript loaded and Firebase listeners set up.');
     </script>
 </body>
 </html>
