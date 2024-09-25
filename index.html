@@ -136,6 +136,7 @@
 
 
 // Initialize Firebase with your config
+// Initialize Firebase with your config
 const firebaseConfig = {
     apiKey: "AIzaSyCIVveFeJsFBTx91_l-cdeeld6bjX88veY",
     authDomain: "wifi-esp32-a7b37.firebaseapp.com",
@@ -175,7 +176,7 @@ function updateSafeStatus(status) {
 function checkOpenRequest() {
     if (colorSequenceValid && tofbValue === 1) {
         updateSafeStatus('request_open');
-        alert('Request to open the safe received!');
+        console.log('Request to open the safe received!');
     } else {
         updateSafeStatus('locked');
     }
@@ -244,17 +245,6 @@ database.ref('color_sequence').on('value', (snapshot) => {
 }, (error) => {
     console.error('Error listening to color sequence:', error);
 });
-
-// Add event listener for double-click to lock the safe
-document.addEventListener('dblclick', lockSafe);
-
-function testFirebaseConnection() {
-    database.ref('.info/connected').once('value')
-        .then((snapshot) => {
-            if (snapshot.val() === true) {
-                alert('Successfully connected to Firebase!');
-            } else {
-                alert('Not connected to Firebase.
 
 // Add event listener for double-click to lock the safe
 document.addEventListener('dblclick', lockSafe);
