@@ -133,8 +133,8 @@
     </div>
 
     <script>
-        // Initialize Firebase with your config
-       // Initialize Firebase with your config
+
+// Initialize Firebase with your config
 const firebaseConfig = {
     apiKey: "AIzaSyCIVveFeJsFBTx91_l-cdeeld6bjX88veY",
     authDomain: "wifi-esp32-a7b37.firebaseapp.com",
@@ -171,19 +171,19 @@ function updateSafeStatus(status) {
 }
 
 function confirmOpenSafe() {
-    database.ref('fromFb').set('1')
+    database.ref('fromFb').set(1)
         .then(() => console.log('Confirm open command sent'))
         .catch(error => console.error('Error sending confirm open command:', error));
 }
 
 function denyOpenSafe() {
-    database.ref('fromFb').set('0')
+    database.ref('fromFb').set(0)
         .then(() => console.log('Deny open command sent'))
         .catch(error => console.error('Error sending deny open command:', error));
 }
 
 function lockSafe() {
-    database.ref('fromFb').set('2')
+    database.ref('fromFb').set(2)
         .then(() => console.log('Lock command sent'))
         .catch(error => console.error('Error sending lock command:', error));
 }
@@ -226,9 +226,9 @@ function checkOpenRequest() {
 database.ref('adddelete/tofb').on('value', (snapshot) => {
     const status = snapshot.val();
     console.log('tofb value:', status);
-    if (status === '1') {
+    if (status === 1) {
         checkOpenRequest();
-    } else if (status === '0') {
+    } else if (status === 0) {
         updateSafeStatus('locked');
     } else if (status === 'open') {
         updateSafeStatus('open');
@@ -251,9 +251,6 @@ database.ref('color_sequence').on('value', (snapshot) => {
 document.addEventListener('dblclick', lockSafe);
 
 console.log('JavaScript loaded and Firebase listeners set up.');
-
-        // Add event listener for double-click to lock the safe
-        document.addEventListener('dblclick', lockSafe);
     </script>
 </body>
 </html>
