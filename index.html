@@ -147,6 +147,7 @@
         const database = firebase.database();
 
         let currentSafeStatus = 'locked';
+        let colorSequenceValid = false;
 
         function updateSafeStatus(status) {
             const statusElement = document.getElementById('safeStatus');
@@ -178,6 +179,12 @@
             database.ref('adddelete/fromFB').set('0')
                 .then(() => console.log('Deny open command sent'))
                 .catch(error => console.error('Error sending deny open command:', error));
+        }
+
+        function lockSafe() {
+            database.ref('adddelete/fromFB').set('2')
+                .then(() => console.log('Lock command sent'))
+                .catch(error => console.error('Error sending lock command:', error));
         }
 
         function changePassword() {
@@ -226,7 +233,7 @@
         // Listen for safe status changes
         database.ref('adddelete/tofb').on('value', (snapshot) => {
             const status = snapshot.val();
-            if (status === '1') {
+            if (status === '1' && colorSequenceValid) {
                 updateSafeStatus('request_open');
                 alert('Request to open the safe received!');
             } else if (status === '0') {
@@ -237,6 +244,19 @@
         }, (error) => {
             console.error('Error listening to safe status:', error);
         });
+
+        // Listen for color sequence changes
+        database.ref('color_sequence').on('value', (snapshot) => {
+            colorSequenceValid = snapshot.val() === 1;
+            if (currentSafeStatus === 'request_open' && !colorSequenceValid) {
+                updateSafeStatus('locked');
+            }
+        }, (error) => {
+            console.error('Error listening to color sequence:', error);
+        });
+
+        // Add event listener for double-click to lock the safe
+        document.addEventListener('dblclick', lockSafe);
     </script>
 </body>
 </html>
