@@ -134,6 +134,7 @@
 
     <script>
 
+
 // Initialize Firebase with your config
 const firebaseConfig = {
     apiKey: "AIzaSyCIVveFeJsFBTx91_l-cdeeld6bjX88veY",
@@ -149,6 +150,7 @@ const database = firebase.database();
 
 let currentSafeStatus = 'locked';
 let colorSequenceValid = false;
+let tofbValue = 0;
 
 function updateSafeStatus(status) {
     const statusElement = document.getElementById('safeStatus');
@@ -168,6 +170,15 @@ function updateSafeStatus(status) {
     document.getElementById('denyOpenBtn').disabled = status !== 'request_open';
     
     document.getElementById('changePasswordForm').style.display = status === 'open' ? 'block' : 'none';
+}
+
+function checkOpenRequest() {
+    if (colorSequenceValid && tofbValue === 1) {
+        updateSafeStatus('request_open');
+        alert('Request to open the safe received!');
+    } else {
+        updateSafeStatus('locked');
+    }
 }
 
 function confirmOpenSafe() {
@@ -215,24 +226,11 @@ function hideColor() {
     document.body.style.overflow = 'auto';
 }
 
-function checkOpenRequest() {
-    if (currentSafeStatus !== 'request_open' && colorSequenceValid) {
-        updateSafeStatus('request_open');
-        alert('Request to open the safe received!');
-    }
-}
-
 // Listen for safe status changes
 database.ref('tofb').on('value', (snapshot) => {
-    const status = snapshot.val();
-    console.log('tofb value:', status);
-    if (status === 1) {
-        checkOpenRequest();
-    } else if (status === 0) {
-        updateSafeStatus('locked');
-    } else if (status === 'open') {
-        updateSafeStatus('open');
-    }
+    tofbValue = snapshot.val();
+    console.log('tofb value:', tofbValue);
+    checkOpenRequest();
 }, (error) => {
     console.error('Error listening to safe status:', error);
 });
@@ -246,6 +244,17 @@ database.ref('color_sequence').on('value', (snapshot) => {
 }, (error) => {
     console.error('Error listening to color sequence:', error);
 });
+
+// Add event listener for double-click to lock the safe
+document.addEventListener('dblclick', lockSafe);
+
+function testFirebaseConnection() {
+    database.ref('.info/connected').once('value')
+        .then((snapshot) => {
+            if (snapshot.val() === true) {
+                alert('Successfully connected to Firebase!');
+            } else {
+                alert('Not connected to Firebase.
 
 // Add event listener for double-click to lock the safe
 document.addEventListener('dblclick', lockSafe);
